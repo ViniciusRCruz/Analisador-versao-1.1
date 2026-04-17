@@ -376,7 +376,8 @@ async function handleChatSubmit() {
       body: JSON.stringify({
         model: selectedModel,
         messages: openRouterMessages,
-        stream: true
+        stream: true,
+        max_tokens: 2000 // Limitando o tamanho da resposta para contornar bloqueios de crédito/limite grátis
       })
     });
 
