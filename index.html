@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CorpAnalyzer</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body class="flex h-screen w-full bg-main text-content font-main overflow-hidden text-[0.85rem]">
+  
+  <!-- Sidebar Focus Area -->
+  <div class="hidden md:flex flex-col w-[240px] bg-sidebar text-white border-r border-[#1a1c1e] p-6 shadow-none z-10 flex-shrink-0">
+    <div class="flex items-center gap-2 mb-8 text-white">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <h1 class="text-[1.25rem] font-[800] tracking-[-0.5px]">LEXIPARSE</h1>
+    </div>
+
+    <div class="space-y-6 flex-grow">
+      <div class="space-y-3">
+        <h2 class="text-[0.75rem] font-bold text-white/50 uppercase tracking-[0.5px] flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          Configurações
+        </h2>
+        
+        <div>
+          <label class="block text-[0.85rem] font-medium text-white/80 mb-1">Modelo de IA (OpenRouter)</label>
+          <select id="model-select" class="w-full bg-white/5 border border-white/10 text-white text-[0.85rem] rounded-[4px] focus:ring-accent-blue focus:border-accent-blue block p-2 transition-colors outline-none">
+            <option value="google/gemini-pro-1.5" class="text-content">Gemini 1.5 Pro</option>
+            <option value="openai/gpt-4o-mini" class="text-content">GPT-4o Mini</option>
+            <option value="anthropic/claude-3.5-sonnet" class="text-content">Claude 3.5 Sonnet</option>
+          </select>
+          <p class="mt-2 text-[0.75rem] text-white/40 leading-relaxed">
+            Selecione o motor do OpenRouter. A chave configurada no Vercel é usada.
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="pt-6 border-t border-white/10">
+      <button id="btn-clear" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-[0.85rem] font-[600] text-accent-red bg-accent-red/10 hover:bg-accent-red hover:text-white rounded-[4px] transition-colors cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+        Limpar Diálogo
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Chat Area -->
+  <div class="flex-1 flex flex-col h-full bg-main relative w-full max-w-full">
+    <header class="h-[64px] bg-white border-b border-border flex items-center px-6 justify-between flex-shrink-0">
+      <div class="text-[0.95rem] font-[600]">
+        Análise Documental
+      </div>
+      <button id="btn-clear-mobile" class="md:hidden p-2 text-secondary hover:text-accent-red transition-colors cursor-pointer">
+         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      </button>
+    </header>
+
+    <!-- Chat History -->
+    <div id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 scroll-smooth">
+      <!-- Empty State -->
+      <div id="empty-state" class="flex flex-col items-center justify-center h-full text-center max-w-lg mx-auto">
+        <div class="w-12 h-12 bg-white border border-border text-secondary rounded flex items-center justify-center mb-4 shadow-sm">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <h2 class="text-[0.95rem] font-[600] text-content mb-2">LexiParse Workspace Limitado</h2>
+        <p class="text-[0.85rem] text-secondary leading-relaxed">
+          Envie documentos, contratos ou imagens para que o assistente gere resumos precisos, extraia prazos críticos e verifique compliance seguindo o rigor do tema High Density.
+        </p>
+      </div>
+      
+      <!-- Dynamic Messages will be injected here -->
+    </div>
+
+    <!-- Input Area -->
+    <div class="p-4 bg-white border-t border-border">
+      <div class="max-w-5xl mx-auto flex flex-col gap-2">
+        <!-- Image attachments preview -->
+        <div id="image-preview-container" class="flex gap-2 pb-2 overflow-x-auto hidden"></div>
+
+        <form id="chat-form" class="flex items-end gap-2 bg-white border border-border rounded-[4px] p-2 focus-within:border-accent-blue transition-all">
+          <input type="file" id="file-input" accept="image/*" multiple class="hidden" />
+          <button type="button" id="btn-upload" class="p-2 text-secondary hover:text-accent-blue rounded transition-colors flex-shrink-0 cursor-pointer" title="Anexar Imagem">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><circle cx="10" cy="12" r="2"/><path d="m20 17-1.296-1.296a2.41 2.41 0 0 0-3.408 0L9 22"/></svg>
+          </button>
+          
+          <textarea id="chat-input" placeholder="Cole o texto do documento, adicione um anexo, ou digite sua pergunta..." class="w-full bg-transparent border-none focus:ring-0 resize-none max-h-48 py-2 font-mono text-[0.85rem] text-secondary min-h-[40px]" rows="1" style="height: auto; outline: none;"></textarea>
+          
+          <button type="submit" id="btn-submit" class="p-2 bg-accent-blue text-white rounded-[4px] hover:bg-[#004494] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 cursor-pointer">
+            <!-- Send Icon -->
+            <svg id="icon-send" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            <!-- Loader Icon (Hidden by default) -->
+            <svg id="icon-loader" class="animate-spin hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          </button>
+        </form>
+        <div class="flex items-center justify-between px-1">
+          <span class="text-[0.7rem] font-bold text-secondary uppercase tracking-[0.5px]">
+            Lexiparse Engine v2.4
+          </span>
+          <span class="text-[0.7rem] text-secondary">
+            Processamento Seguro
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script type="module" src="/script.js"></script>
+</body>
+</html>

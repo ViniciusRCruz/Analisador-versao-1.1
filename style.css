@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme {
+  --color-main: #f8f9fa;
+  --color-sidebar: #1a1c1e;
+  --color-border: #dee2e6;
+  --color-content: #212529;
+  --color-secondary: #495057;
+  --color-accent-blue: #0056b3;
+  --color-accent-amber: #f59e0b;
+  --color-accent-green: #10b981;
+  --color-accent-red: #ef4444;
+  --font-main: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+@layer utilities {
+  .prose {
+    color: var(--color-content);
+    font-size: 0.82rem;
+    line-height: 1.4;
+  }
+  .prose h1, .prose h2, .prose h3 {
+    font-weight: 800;
+    color: var(--color-secondary);
+    margin-top: 1.2em;
+    margin-bottom: 0.6em;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+  }
+  
+  .prose p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+  .prose p:first-child { margin-top: 0; }
+  .prose p:last-child { margin-bottom: 0; }
+  
+  .prose ul, .prose ol {
+    margin-top: 4px;
+    padding-left: 0;
+    list-style: none;
+  }
+  .prose li {
+    position: relative;
+    padding-left: 15px;
+    margin-bottom: 4px;
+  }
+  .prose ul li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--color-accent-blue);
+  }
+  .prose ol li {
+    counter-increment: list;
+  }
+  .prose ol li::before {
+    content: counter(list) ".";
+    position: absolute;
+    left: 0;
+    color: var(--color-accent-blue);
+    font-weight: 600;
+    font-size: 0.7rem;
+  }
+  
+  .prose strong {
+    font-weight: 800;
+    color: inherit;
+  }
+  
+  .prose hr {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+    border-color: var(--color-border);
+  }
+  
+  .prose-invert {
+    color: #fff;
+    font-size: 0.85rem;
+  }
+  .prose-invert h1, .prose-invert h2, .prose-invert h3 {
+    color: #fff;
+  }
+  .prose-invert hr {
+    border-color: rgba(255,255,255,0.2);
+  }
+  .prose-invert ul li::before, .prose-invert ol li::before {
+    color: #fff;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-main); 
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border); 
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-secondary); 
+}
