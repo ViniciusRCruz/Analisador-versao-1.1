@@ -410,14 +410,29 @@ async function handleChatSubmit() {
         if (trimmed.startsWith('data: ')) {
           try {
             const data = JSON.parse(trimmed.slice(6));
-            const deltaContent = data.choices?.[0]?.delta?.content || '';
+            if (data.error) {
+              fullText += '\n**ERRO DA API:** ' + (data.error.message || JSON.stringify(data.error));
+            }
+            const delta = data.choices?.[0]?.delta || data.choices?.[0]?.message || {};
+            const deltaContent = delta.content || '';
             if (deltaContent) {
               fullText += deltaContent;
             }
           } catch (e) {
             // Ignorar recortes parciais
           }
+        } else if (trimmed.startsWith('{') && trimmed.includes('"error"')) {
+           try {
+             const data = JSON.parse(trimmed);
+             if (data.error) fullText += '\n**ERRO DA API:** ' + (data.error.message || JSON.stringify(data.error));
+           } catch(e) {}
         }
+      }
+      if (!fullText && buffer.startsWith('{') && buffer.includes('error')) {
+         try {
+             const data = JSON.parse(buffer);
+             if (data.error) fullText += '\n**ERRO DA API:** ' + (data.error.message || JSON.stringify(data.error));
+         } catch(e) {}
       }
       await updateMessageText(modelId, fullText);
     }
@@ -434,7 +449,7 @@ async function handleChatSubmit() {
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x1="12" y1="15" y2="3"/></svg>
         Gerar Relatório PDF
       `;
-      downloadBtn.addEventListener('click', () => generatePDF(fullText));
+      downloadBtn.addEventListener('click', async () => await generatePDF(fullText));
       btnContainer.appendChild(downloadBtn);
       contentEl.appendChild(btnContainer);
       scrollToBottom();
@@ -472,7 +487,7 @@ async function handleChatSubmit() {
   }
 }
 
-function generatePDF(markdownText) {
+async function generatePDF(markdownText) {
   const el = document.createElement('div');
   
   // Format HTML with dedicated print styles for the PDF
@@ -499,7 +514,7 @@ function generatePDF(markdownText) {
         </div>
       </div>
       <div class="pdf-prose">
-        ${DOMPurify.sanitize(marked.parse(markdownText))}
+        ${DOMPurify.sanitize(await marked.parse(markdownText))}
       </div>
       <div style="margin-top: 50px; padding-top: 15px; border-top: 1px solid #e2e8f0; text-align: center; color: #94a3b8; font-size: 9pt;">
         Documento gerado de forma automatizada por Inteligência Artificial.<br/>
