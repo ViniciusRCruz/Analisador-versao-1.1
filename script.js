@@ -88,6 +88,27 @@ function fileToGenerativePart(file) {
   });
 }
 
+// Utility: Extract PDF Text using installed pdf.js backend
+async function extractPdfText(file) {
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = "";
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(" ");
+        fullText += pageText + "\n";
+    }
+    return fullText;
+  } catch (error) {
+    console.error("Erro ao ler PDF", error);
+    return "Erro ao extrair texto do documento.";
+  }
+}
+
+const PDF_ICON = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/><line x1='16' y1='13' x2='8' y2='13'/><line x1='16' y1='17' x2='8' y2='17'/><polyline points='10 9 9 9 8 9'/></svg>";
+
 // Event Listeners setup
 btnUpload.addEventListener('click', () => fileInput.click());
 
@@ -95,18 +116,29 @@ fileInput.addEventListener('change', async (e) => {
   const files = e.target.files;
   if (!files) return;
 
+  btnSubmit.disabled = true; // Block submit during processing
+  
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    if (!file.type.startsWith('image/')) continue;
-    
-    const genPart = await fileToGenerativePart(file);
-    
-    attachedImages.push({
-      file,
-      previewUrl: URL.createObjectURL(file),
-      base64Data: genPart.inlineData.data,
-      mimeType: genPart.inlineData.mimeType
-    });
+    if (file.type === 'application/pdf') {
+       const pdfText = await extractPdfText(file);
+       attachedImages.push({
+         isPdf: true,
+         file,
+         pdfText,
+         previewUrl: PDF_ICON
+       });
+    } else if (file.type.startsWith('image/')) {
+      const genPart = await fileToGenerativePart(file);
+      
+      attachedImages.push({
+        isPdf: false,
+        file,
+        previewUrl: URL.createObjectURL(file),
+        base64Data: genPart.inlineData.data,
+        mimeType: genPart.inlineData.mimeType
+      });
+    }
   }
   
   fileInput.value = ''; // Reset
@@ -220,10 +252,17 @@ function appendMessageDOM(id, role, text, inlineImages = []) {
     const imgContainer = document.createElement('div');
     imgContainer.className = 'flex flex-wrap gap-2';
     inlineImages.forEach(img => {
-      const imgEl = document.createElement('img');
-      imgEl.src = `data:${img.mimeType};base64,${img.data}`;
-      imgEl.className = 'max-h-48 rounded-lg border border-white/20 shadow-sm object-contain bg-black/5';
-      imgContainer.appendChild(imgEl);
+      if (img.isPdf) {
+         const pdfDiv = document.createElement('div');
+         pdfDiv.className = 'flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg border border-white/20 shadow-sm';
+         pdfDiv.innerHTML = `<img src="${img.previewUrl}" class="w-6 h-6 object-contain" /> <span class="text-[0.8rem] font-medium opacity-90 truncate max-w-[200px]">${img.name}</span>`;
+         imgContainer.appendChild(pdfDiv);
+      } else {
+         const imgEl = document.createElement('img');
+         imgEl.src = `data:${img.mimeType};base64,${img.data}`;
+         imgEl.className = 'max-h-48 rounded-lg border border-white/20 shadow-sm object-contain bg-black/5';
+         imgContainer.appendChild(imgEl);
+      }
     });
     contentWrapper.appendChild(imgContainer);
   }
@@ -310,16 +349,25 @@ async function handleChatSubmit() {
   }
   
   for (const img of currentImages) {
-    userParts.push({
-      inlineData: {
+    if (img.isPdf) {
+      userParts.push({ text: `\n\n[Conteúdo do Documento PDF anexado: ${img.file.name}]\n${img.pdfText}\n[Fim do Documento PDF]` });
+      inlineImages.push({
+        isPdf: true,
+        name: img.file.name,
+        previewUrl: img.previewUrl
+      });
+    } else {
+      userParts.push({
+        inlineData: {
+          data: img.base64Data,
+          mimeType: img.mimeType
+        }
+      });
+      inlineImages.push({
         data: img.base64Data,
         mimeType: img.mimeType
-      }
-    });
-    inlineImages.push({
-      data: img.base64Data,
-      mimeType: img.mimeType
-    });
+      });
+    }
   }
 
   const userId = Date.now().toString();
