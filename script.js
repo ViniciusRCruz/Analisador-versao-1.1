@@ -425,7 +425,7 @@ async function handleChatSubmit() {
         model: selectedModel,
         messages: openRouterMessages,
         stream: true,
-        max_tokens: 2000 // Limitando o tamanho da resposta para contornar bloqueios de crédito/limite grátis
+        max_tokens: 1000 // Reduzido para caber nos parcos créditos restantes da sua conta atual
       })
     });
 
